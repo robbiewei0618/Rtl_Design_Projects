@@ -1,0 +1,71 @@
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : Intensity
+Version: V-2023.12
+Date   : Tue Nov 19 00:28:06 2024
+****************************************
+
+Operating Conditions: ss0p72vm40c   Library: N16ADFP_StdCellss0p72vm40c_ccs
+Wire Load Model Mode: top
+
+  Startpoint: G[4] (input port clocked by clk)
+  Endpoint: Y[7] (output port clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  Intensity          ZeroWireload          N16ADFP_StdCellss0p72vm40c_ccs
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  input external delay                                    0.00       0.00 r
+  G[4] (in)                                               0.00       0.00 r
+  U28/ZN (ND2D1BWP16P90LVT)                               0.01       0.01 f
+  U10/ZN (CKND1BWP16P90LVT)                               0.01       0.01 r
+  U29/ZN (MAOI222D1BWP16P90LVT)                           0.01       0.02 f
+  U30/ZN (INVD1BWP16P90LVT)                               0.01       0.03 r
+  U36/Z (XOR3D1BWP16P90LVT)                               0.03       0.06 f
+  U9/ZN (CKND1BWP16P90LVT)                                0.01       0.07 r
+  U51/Z (XOR3D1BWP16P90LVT)                               0.04       0.11 f
+  add_0_root_add_0_root_add_4_4/A[2] (Intensity_DW01_add_4)
+                                                          0.00       0.11 f
+  add_0_root_add_0_root_add_4_4/U25/ZN (ND2D1BWP16P90LVT)
+                                                          0.01       0.12 r
+  add_0_root_add_0_root_add_4_4/U39/ZN (CKND1BWP16P90LVT)
+                                                          0.01       0.13 f
+  add_0_root_add_0_root_add_4_4/U38/Z (AO21D1BWP16P90LVT)
+                                                          0.02       0.15 f
+  add_0_root_add_0_root_add_4_4/U16/CO (FA1D1BWP16P90LVT)
+                                                          0.03       0.17 f
+  add_0_root_add_0_root_add_4_4/U40/ZN (CKND1BWP16P90LVT)
+                                                          0.01       0.18 r
+  add_0_root_add_0_root_add_4_4/U10/ZN (OAI21D1BWP16P90LVT)
+                                                          0.01       0.19 f
+  add_0_root_add_0_root_add_4_4/U8/CO (FA1D1BWP16P90LVT)
+                                                          0.03       0.22 f
+  add_0_root_add_0_root_add_4_4/U7/CO (FA1D1BWP16P90LVT)
+                                                          0.03       0.25 f
+  add_0_root_add_0_root_add_4_4/U6/S (HA1D2BWP16P90LVT)
+                                                          0.02       0.27 r
+  add_0_root_add_0_root_add_4_4/SUM[7] (Intensity_DW01_add_4)
+                                                          0.00       0.27 r
+  Y[7] (out)                                              0.00       0.27 r
+  data arrival time                                                  0.27
+
+  max_delay                                               0.31       0.31
+  output external delay                                   0.00       0.31
+  data required time                                                 0.31
+  --------------------------------------------------------------------------
+  data required time                                                 0.31
+  data arrival time                                                 -0.27
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.04
+
+
+1

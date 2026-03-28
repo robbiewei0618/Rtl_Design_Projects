@@ -1,0 +1,105 @@
+0
+39
++access+r
++fsdb+mda
++fsdbfile+am.fsdb
++full64
++itf+/usr/cad/synopsys/vcs/2023.12/linux/lib/vcsdp_lite.tab
++v2k
++vcs+fsdbon
++vcsd1
++vpi
+-Mamsrun=
+-Masflags=--32
+-Mcc=gcc
+-Mcfl= -pipe -m32 -O -I/usr/cad/synopsys/vcs/2023.12/include
+-Mcplusplus=g++
+-Mcrt0=
+-Mcrtn=
+-Mcsrc=
+-Mexternalobj=
+-Mldflags= -m32 -m32 -rdynamic
+-Mobjects= /usr/cad/synopsys/vcs/2023.12/linux/lib/libvirsim.so /usr/cad/synopsys/vcs/2023.12/linux/lib/liberrorinf.so /usr/cad/synopsys/vcs/2023.12/linux/lib/libsnpsmalloc.so /usr/cad/synopsys/vcs/2023.12/linux/lib/libvfs.so
+-Mout=simv
+-Msaverestoreobj=/usr/cad/synopsys/vcs/2023.12/linux/lib/vcs_save_restore_new.o
+-Msyslibs=/usr/cad/synopsys/verdi/2023.12/share/PLI/VCS/LINUX/pli.a /usr/cad/synopsys/vcs/2023.12/linux/lib/ctype-stubs_32.a -ldl
+-Mvcsaceobjs=
+-Mxcflags= -pipe -m32 -I/usr/cad/synopsys/vcs/2023.12/include
+-Mxllcflags=
+-P
+-Xvcs_run_simv=1
+-debug_access
+-debug_access+all
+-fsdb
+-gen_obj
+-picarchive
+/usr/cad/synopsys/vcs/2023.12/linux/bin/vcs1
+/usr/cad/synopsys/verdi/2023.12/share/PLI/VCS/LINUX/verdi.tab
+/home/B103040012_HDL/HDL/HW2/Testbench/testbench.v
+/home/B103040012_HDL/HDL/HW2/RTL/Non_pipeline/non_pipeline.v
+/home/B103040012_HDL/HDL/HW2/RTL/Pipeline/pipeline.v
+/home/B103040012_HDL/HDL/HW2/RTL/Clock_gating/clock_gating.v
+47
+XDG_SESSION_ID=67459
+XDG_RUNTIME_DIR=/run/user/1021
+XDG_DATA_DIRS=/home/B103040012_HDL/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+VMR_MODE_FLAG=32
+VERDI_HOME=/usr/cad/synopsys/verdi/2023.12
+VENDOR=unknown
+VCS_STATIC_HOME=/usr/cad/synopsys/vcs/2023.12/vcfca
+VCS_PYTHON3=/usr/cad/synopsys/vcs/2023.12/linux/bin/Python-3.6.1/bin/python3
+VCS_PATHMAP_PRELOAD_DONE=1
+VCS_MX_HOME_INTERNAL=1
+VCS_HOME=/usr/cad/synopsys/vcs/2023.12
+VCS_EXEC_DONE=1
+VCS_DEPTH=0
+VCS_CC=gcc
+VCS_ARG_ADDED_FOR_TMP=1
+VCS_ARCH=linux
+VCS_AMD_PURE32=1
+UNAME=/bin/uname
+TOOL_HOME=/usr/cad/synopsys/vcs/2023.12/linux
+SYN_MAN_DIR=/usr/cad/synopsys/lc/2023.12//doc/lc/man
+SYNOPSYS_LC_ROOT=/usr/cad/synopsys/lc/cur
+SYNOPSYS=/usr/cad/synopsys/formality/cur
+SSH_TTY=/dev/pts/9
+SSH_CONNECTION=140.117.6.105 2590 140.117.168.154 22
+SSH_CLIENT=140.117.6.105 2590 22
+SNPS_VCS_PYTHON3=/usr/cad/synopsys/vcs/2023.12/linux/bin/Python-3.6.1/bin/python3
+SNPS_VCS_CLANG_PATH=/usr/cad/synopsys/vcs/2023.12/linux/clang
+SNPS_INTERNAL_VCS_LINUX_OS=linux
+SHLIB_PATH=/usr/cad/synopsys/verdi/2023.12/etc/lib/libstdc++/LINUX64/:/usr/cad/synopsys/verdi/2023.12/share/PLI/lib/LINUX64/:/usr/cad/synopsys/verdi/2023.12/share/PLI/VCS/LINUX64/:
+SELINUX_USE_CURRENT_RANGE=
+SELINUX_ROLE_REQUESTED=
+SELINUX_LEVEL_REQUESTED=
+SCRNAME=vcs
+SCRIPT_NAME=vcs
+REMOTEHOST=140.117.6.105
+QT_GRAPHICSSYSTEM_CHECKED=1
+QTLIB=/usr/lib64/qt-3.3/lib
+QTINC=/usr/lib64/qt-3.3/include
+QTDIR=/usr/lib64/qt-3.3
+OVA_UUM=0
+OSTYPE=linux
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+LC_ALL=C
+HOSTTYPE=x86_64-linux
+HISTCONTROL=ignoredups
+GROUP=B103040012_HDL
+FORMALITY=/usr/cad/synopsys/formality/cur
+0
+0
+6
+1729169659 /home/B103040012_HDL/HDL/HW2/RTL/Clock_gating/clock_gating.v
+1729101430 /home/B103040012_HDL/HDL/HW2/RTL/Pipeline/pipeline.v
+1728751257 /home/B103040012_HDL/HDL/HW2/RTL/Non_pipeline/non_pipeline.v
+1729170123 /home/B103040012_HDL/HDL/HW2/Testbench/testbench.v
+1700046855 /usr/cad/synopsys/verdi/2023.12/share/PLI/VCS/LINUX/verdi.tab
+1701102453 /usr/cad/synopsys/vcs/2023.12/linux/lib/vcsdp_lite.tab
+4
+1701104144 /usr/cad/synopsys/vcs/2023.12/linux/lib/libvirsim.so
+1701103500 /usr/cad/synopsys/vcs/2023.12/linux/lib/liberrorinf.so
+1701103368 /usr/cad/synopsys/vcs/2023.12/linux/lib/libsnpsmalloc.so
+1701103830 /usr/cad/synopsys/vcs/2023.12/linux/lib/libvfs.so
+1729170129 simv.daidir
+-1 partitionlib

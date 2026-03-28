@@ -1,0 +1,83 @@
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : thumb
+Version: V-2023.12
+Date   : Sat Nov  9 16:15:19 2024
+****************************************
+
+Operating Conditions: ss0p72vm40c   Library: N16ADFP_StdCellss0p72vm40c_ccs
+Wire Load Model Mode: top
+
+  Startpoint: step2/ID_Rm_Rs_reg_2_
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: step3/Z_Flag_reg
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  thumb              ZeroWireload          N16ADFP_StdCellss0p72vm40c_ccs
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clk (rise edge)                                 0.0000     0.0000
+  clock network delay (ideal)                           0.2000     0.2000
+  step2/ID_Rm_Rs_reg_2_/CP (DFCNQD2BWP16P90LVT)         0.0000     0.2000 r
+  step2/ID_Rm_Rs_reg_2_/Q (DFCNQD2BWP16P90LVT)          0.0664     0.2664 f
+  step2/ID_Rm_Rs[2] (ID)                                0.0000     0.2664 f
+  step3/ID_Rm_Rs[2] (EX)                                0.0000     0.2664 f
+  step3/U1949/Z (BUFFD4BWP16P90LVT)                     0.0150     0.2814 f
+  step3/mult_198/b[2] (EX_DW_mult_uns_1)                0.0000     0.2814 f
+  step3/mult_198/U1978/Z (BUFFD2BWP16P90LVT)            0.0188     0.3002 f
+  step3/mult_198/U1656/ZN (XNR2D1BWP16P90LVT)           0.0256     0.3258 r
+  step3/mult_198/U864/ZN (OAI22D1BWP16P90LVT)           0.0185     0.3442 f
+  step3/mult_198/U2290/CO (FA1D1BWP16P90LVT)            0.0293     0.3735 f
+  step3/mult_198/U1982/S (FA1D1BWP16P90LVT)             0.0457     0.4192 r
+  step3/mult_198/U1408/Z (XOR2D4BWP16P90LVT)            0.0224     0.4417 f
+  step3/mult_198/U1487/Z (XOR2D4BWP16P90LVT)            0.0185     0.4601 r
+  step3/mult_198/U1486/Z (OR2D4BWP16P90LVT)             0.0127     0.4729 r
+  step3/mult_198/U1511/ZN (ND2D2BWP16P90LVT)            0.0078     0.4807 f
+  step3/mult_198/U2456/ZN (OAI21D1BWP16P90LVT)          0.0101     0.4908 r
+  step3/mult_198/U2584/ZN (AOI21D1BWP16P90LVT)          0.0088     0.4996 f
+  step3/mult_198/U2591/ZN (OAI21D1BWP16P90LVT)          0.0108     0.5105 r
+  step3/mult_198/U2627/ZN (AOI21D2BWP16P90LVT)          0.0144     0.5249 f
+  step3/mult_198/U1952/ZN (OAI21D4BWP16P90LVT)          0.0129     0.5378 r
+  step3/mult_198/U1544/ZN (AOI21D4BWP16P90LVT)          0.0097     0.5475 f
+  step3/mult_198/U1368/Z (OA21D2BWP16P90LVT)            0.0143     0.5618 f
+  step3/mult_198/U1645/ZN (ND2D1BWP16P90LVT)            0.0053     0.5671 r
+  step3/mult_198/U1916/ZN (ND2D1BWP16P90LVT)            0.0082     0.5753 f
+  step3/mult_198/product[29] (EX_DW_mult_uns_1)         0.0000     0.5753 f
+  step3/U391/ZN (AOI21D2BWP16P90LVT)                    0.0077     0.5830 r
+  step3/U4872/ZN (AOI31D1BWP16P90LVT)                   0.0125     0.5955 f
+  step3/U1311/ZN (IND4D2BWP16P90LVT)                    0.0233     0.6189 f
+  step3/U3688/ZN (MUX2ND2BWP16P90LVT)                   0.0245     0.6433 r
+  step3/U802/ZN (ND3D1BWP16P90LVT)                      0.0115     0.6548 f
+  step3/U604/ZN (AOI211D2BWP16P90LVT)                   0.0117     0.6665 r
+  step3/U2425/ZN (OAI211D2BWP16P90LVT)                  0.0118     0.6784 f
+  step3/U1289/ZN (NR3D1BWP16P90LVT)                     0.0109     0.6893 r
+  step3/U5136/ZN (ND4D1BWP16P90LVT)                     0.0119     0.7011 f
+  step3/U5137/ZN (AOAI211D1BWP16P90LVT)                 0.0085     0.7096 r
+  step3/U1386/ZN (INVD1BWP16P90LVT)                     0.0068     0.7164 f
+  step3/Z_Flag_reg/D (DFQD2BWP16P90LVT)                 0.0000     0.7164 f
+  data arrival time                                                0.7164
+
+  clock clk (rise edge)                                 0.5158     0.5158
+  clock network delay (ideal)                           0.2000     0.7158
+  clock uncertainty                                    -0.0200     0.6958
+  step3/Z_Flag_reg/CP (DFQD2BWP16P90LVT)                0.0000     0.6958 r
+  library setup time                                    0.0206     0.7164
+  data required time                                               0.7164
+  --------------------------------------------------------------------------
+  data required time                                               0.7164
+  data arrival time                                               -0.7164
+  --------------------------------------------------------------------------
+  slack (MET)                                                      0.0000
+
+
+1
