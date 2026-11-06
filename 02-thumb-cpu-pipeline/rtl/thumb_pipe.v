@@ -142,7 +142,8 @@ module thumb (read_instruction_n, instruction_address,
 
   // ASSIGN STATEMENTS
   assign instruction_address = PC;  // set instr. address to PC
-  assign data = (~write_data_n) ? DR : 0;  // tri-state data
+  // release the bus when not writing: the memory drives it during loads
+  assign data = (~write_data_n) ? DR : {`WORD_SIZE{1'bz}};  // tri-state data
 
   // convert R to R_flat_in
   always @(*) begin
