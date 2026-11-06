@@ -46,7 +46,14 @@ module hw2_cg(d, a, b, c, s, rst, clk);
 	
     wire [2*width-1:0] sum, sumo, c0, c1, product;
 
-    wire gclk = clk && c;
+    // Integrated clock gate: the enable is captured by a latch that is
+    // transparent while clk is low, so it cannot change while clk is high
+    // and gclk can only pulse together with clk. (A plain `clk && c` gate
+    // pulses whenever c rises during the high phase - see BUGS.md.)
+    reg  en_latch;
+    always @(clk or c)
+        if (!clk) en_latch = |c;
+    wire gclk = clk & en_latch;
 	
 	clock_gate16 cg2(.Q(c0), .D({8'b0, c}), .en(clk), .rst(rst), .clk(clk));
     stage1_cg uut1(.sum(sum), .a(a), .b(b), .s(s));
