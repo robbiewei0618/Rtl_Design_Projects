@@ -1,3 +1,8 @@
+// =============================================================================
+// golden/thumb_ref.v - course-provided pipelined Thumb CPU (Sunggu Lee, 2003),
+// used as the reference model for the lockstep comparison in verif/.
+// Changes: module renamed thumb -> thumb_ref; data bus released when idle.
+// =============================================================================
 /////////////////////////////////////////////////////////////////
 // GLOBAL PARAMETER DEFINITIONS
 `define WORD_SIZE 32    // bits in data registers and address
@@ -92,7 +97,7 @@
 //`include "thumb_defs.vh"    // global constant definitions
 
 // MODULE DECLARATION
-module thumb (read_instruction_n, instruction_address,
+module thumb_ref (read_instruction_n, instruction_address,
               instruction, read_data_n, write_data_n,
               data_address, data, reset_n, clk);
   output read_instruction_n;  // enable read from instruction mem
@@ -145,7 +150,10 @@ module thumb (read_instruction_n, instruction_address,
   
   // ASSIGN STATEMENTS
   assign instruction_address = PC;  // set instr. address to PC
-  assign data = (~write_data_n) ? DR : 0;  // tri-state data
+  // patched for this repository: release the bus when not writing. The
+  // course original drove 0 here, which fights the memory during every load
+  // (see BUGS.md #1); it is otherwise unchanged and serves as the golden model.
+  assign data = (~write_data_n) ? DR : {`WORD_SIZE{1'bz}};  // tri-state data
   
   // Function and Task Definitions
   // Function to check condition codes

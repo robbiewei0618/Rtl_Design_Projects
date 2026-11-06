@@ -38,7 +38,11 @@ module tb_thumb();
   reg [`WORD_SIZE-1:0] write_data;         // data to be written
 
   // instantiate the unit under test
-  thumb UUT (read_instruction_n, instruction_address, instruction,
+  // -DCPU=thumb_ref runs the course reference core instead
+`ifndef CPU
+  `define CPU thumb
+`endif
+  `CPU UUT (read_instruction_n, instruction_address, instruction,
             read_data_n, write_data_n, data_address, data,
             reset_n, clk);
   
