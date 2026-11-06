@@ -83,7 +83,7 @@ with NumPy.
 make test          # every course testbench + every verification run
 make legacy        # course testbenches only
 make verif         # new verification only
-make -C 04-cnn-accelerator/verif full    # the full 224x224 CNN run (~10 min)
+make -C 04-cnn-accelerator/verif full    # the full 224x224 CNN run (~4 min, 57.8 M checks)
 ```
 
 ## Repository layout
