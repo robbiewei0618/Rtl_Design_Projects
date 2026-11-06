@@ -10,7 +10,8 @@ name=$1 pass=$2 fail=$3 rundir=$4; shift 4
 [ "${1:-}" = "--" ] && shift
 logdir=$(pwd)/build/legacy; mkdir -p "$logdir"
 log=$logdir/$name.log
-( cd "$rundir" && iverilog -g2012 -o "$logdir/$name.vvp" "$@" && timeout ${LEGACY_TIMEOUT:-900} vvp -n "$logdir/$name.vvp" ) > "$log" 2>&1
+t=${LEGACY_TIMEOUT:-900}; [ "$t" = 0 ] && t=infinity
+( cd "$rundir" && iverilog -g2012 -o "$logdir/$name.vvp" "$@" && timeout $t vvp -n "$logdir/$name.vvp" ) > "$log" 2>&1
 rc=$?
 status=PASS
 [ $rc -ne 0 ] && status=FAIL

@@ -1,282 +1,161 @@
+// =============================================================================
+// pre_syn_tb.v - VGG-16 conv1_1 + conv1_2 on cat224.bmp with conv_engine
+//
+// Course-style image testbench (plain Verilog, runs on Icarus): streams the
+// zero-padded image through the engine 16 times for conv1_1 (4 of 64 output
+// channels per pass) and 16 x 16 times for conv1_2 (4 output x 4 input
+// channels per pass, partial sums kept in psum[] between passes), and writes
+// every feature map as a PGM image to out_layer1/ and out_layer2/.
+//   -DS_IMG=<S>  run on the top-left S x S crop (default 224: about 14 M
+//                clock cycles, hours in Icarus; `make legacy` uses 24)
+// The original course testbench for the first engine is archive_pre_syn_tb.v.
+// =============================================================================
 `timescale 1ns / 1ns
-`define period                  10
-`define img_max_size            224*224*3+54
-`define padding_img_size        226*226
-`define weight_1_size           9*3*64
-`define weight_2_size           9*64*64
-`define bias_size               64
-`define weight_1_input_size     9*3
-`define weight_2_input_size     9*4
+`define period 10
+`ifndef S_IMG
+  `define S_IMG 224
+`endif
+`define S   `S_IMG
+`define WP  (`S_IMG + 2)
+`define NP  ((`S_IMG + 2) * (`S_IMG + 2))
 
-//---------------------------------------------------------------
-//You need specify the path of image in/out
-//---------------------------------------------------------------
-`define path_img_in      "../../data/cat224.bmp"
-`define conv1_weight     "../../data/conv1_kernel_hex.txt"
-`define conv1_bias       "../../data/conv1_bias_hex.txt"
-`define conv2_weight     "../../data/conv2_kernel_hex.txt"
-`define conv2_bias       "../../data/conv2_bias_hex.txt"
-`define IMG_PATH_BASE_1    "out_layer1/cat_"
-`define IMG_PATH_BASE_2    "out_layer2/cat_"
-
-module HDL_HW5_TB;
-    integer img_in, img_out_1, img_out_2, img_out_3, img_out_4;
-    integer weight_1, status_1, bias_1, status_11;
-    integer weight_2, status_2, bias_2, status_22;
-    integer offset, img_h, img_w, header;
-    integer count;
-    integer idx, jdx, img_idx; 
-    integer h, w;
-
-    reg         clk, rst, sel, sel2;
+module pre_syn_tb;
+    reg         clk, rst, layer, last;
     wire        en;
-    reg  [7:0]  img_data [0:`img_max_size-1];               // input bmp
-    reg  signed [15:0]  weight_1_data [0:`weight_1_size-1]; // input weight 1 
-    reg  signed [15:0]  bias_1_data [0:`bias_size-1];       // input bias 1 
-    reg  signed [15:0]  weight_2_data [0:`weight_2_size-1]; // input weight 2
-    reg  signed [15:0]  bias_2_data [0:`bias_size-1];       // input bias 2
-    reg  [7:0]  padding_img [2:0][0:`padding_img_size-1];   // padding R,G,B
-    reg  [7:0]  padding_img_after_layer1 [63:0][0:`padding_img_size-1]; // padding data after layer 1
-    reg  [255*8:1]  img_path_1, img_path_2, img_path_3, img_path_4; // output file path
-    reg  signed [8:0]  pixel_1, pixel_2, pixel_3, pixel_4;  // layer 1 RBG
-    wire [7:0]  out_1, out_2, out_3, out_4; 
-    reg signed [9*4*16-1:0]  input_weight_1, input_weight_2, input_weight_3, input_weight_4;
-    reg signed [15:0]       input_bias_1, input_bias_2, input_bias_3, input_bias_4;
+    reg  [7:0]  bmp [0:224*224*3+54-1];
+    reg  signed [15:0] w1 [0:64*3*9-1], b1 [0:63], w2 [0:64*64*9-1], b2 [0:63];
+    reg  [7:0]  in0 [0:3*`NP-1];        // padded RGB (channel-major)
+    reg  [7:0]  l1  [0:64*`NP-1];       // padded conv1_1 maps
+    reg  [7:0]  l2  [0:64*`S*`S-1];     // conv1_2 maps
+    reg  signed [35:0] psum [0:4*`S*`S-1];
+    reg  signed [8:0]  pixel_1, pixel_2, pixel_3, pixel_4;
+    reg  signed [9*4*16-1:0] wt1, wt2, wt3, wt4;
+    reg  signed [15:0] bs1, bs2, bs3, bs4;
+    reg  signed [4*36-1:0] psum_in;
+    wire signed [4*36-1:0] psum_out;
+    wire [7:0]  out_1, out_2, out_3, out_4;
+    integer off, og, ig, k, j, idx, n, fd, ch;
+    reg [8*64-1:0] fname;
 
-    //---------------------------------------------------------------
-    //Insert your verilog module at here
-    //
-    layer_1 L1 (clk, rst, sel, sel2, en, pixel_1, pixel_2, pixel_3, pixel_4, 
-                input_weight_1, input_weight_2, input_weight_3, input_weight_4, 
-                input_bias_1, input_bias_2, input_bias_3, input_bias_4,
-                out_1, out_2, out_3, out_4);
-    //
-    //---------------------------------------------------------------
+    conv_engine #(.W_PAD(`WP)) engine (
+        .clk(clk), .rst(rst), .layer(layer), .last(last), .en(en),
+        .pixel_1(pixel_1), .pixel_2(pixel_2), .pixel_3(pixel_3), .pixel_4(pixel_4),
+        .input_weight_1(wt1), .input_weight_2(wt2), .input_weight_3(wt3), .input_weight_4(wt4),
+        .input_bias_1(bs1), .input_bias_2(bs2), .input_bias_3(bs3), .input_bias_4(bs4),
+        .psum_in(psum_in), .psum_out(psum_out),
+        .out_1(out_1), .out_2(out_2), .out_3(out_3), .out_4(out_4));
 
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-    //---------------------------------------------------------------
-    //This initial block read the pixel 
-    //---------------------------------------------------------------
-    initial begin
-        // open input files
-        img_in  = $fopen(`path_img_in, "rb");
-        bias_1  = $fopen(`conv1_bias, "r");
-        weight_1  = $fopen(`conv1_weight, "r");
-        bias_2  = $fopen(`conv2_bias, "r");
-        weight_2  = $fopen(`conv2_weight, "r");
+    initial clk = 1'b0;
+    always #(`period / 2) clk = ~clk;
 
-        // read input files
-        $fread(img_data, img_in);
-        idx = 0;
-        while (!$feof(weight_1)) begin
-            status_1 = $fscanf(weight_1, "%h\n", weight_1_data[idx]);
-            if (status_1 == 1) idx = idx + 1;
+    // pixel idx of input group g of the current layer
+    function [8:0] in_px;
+        input integer g, c, i;
+        begin
+            if (!layer) in_px = (c < 3) ? {1'b0, in0[c * `NP + i]} : 9'd0;
+            else        in_px = {1'b0, l1[(g * 4 + c) * `NP + i]};
         end
-        idx = 0;
-        while (!$feof(bias_1)) begin
-            status_11 = $fscanf(bias_1, "%h\n", bias_1_data[idx]);
-            if (status_11 == 1) idx = idx + 1;
-        end
-        idx = 0;
-        while (!$feof(weight_2)) begin
-            status_2 = $fscanf(weight_2, "%h\n", weight_2_data[idx]);
-            if (status_2 == 1) idx = idx + 1;
-        end
-        idx = 0;
-        while (!$feof(bias_2)) begin
-            status_22 = $fscanf(bias_2, "%h\n", bias_2_data[idx]);
-            if (status_22 == 1) idx = idx + 1;
-        end
+    endfunction
 
-        // read header information of input file
-        img_w   = {img_data[21],img_data[20],img_data[19],img_data[18]};
-        img_h   = {img_data[25],img_data[24],img_data[23],img_data[22]};
-        offset  = {img_data[13],img_data[12],img_data[11],img_data[10]};
-
-        // zero padding of read image
-        for(idx = 0; idx<`padding_img_size; idx = idx+1) begin
-            for(jdx = 0; jdx < 3; jdx = jdx+1) begin
-                padding_img[jdx][idx] = 0;
-            end
-        end
-        for(idx = 0; idx<`padding_img_size; idx = idx+1) begin
-            for(jdx = 0; jdx < 64; jdx = jdx+1) begin
-                padding_img_after_layer1[jdx][idx] = 0;
-            end
-        end
-
-        for(h = 0; h < img_h; h = h+1) begin
-            for(w = 0; w < img_w; w = w+1) begin
-                padding_img[2][h*226+w+227] = img_data[(h*224+w)*3 + offset + 2];
-                padding_img[1][h*226+w+227] = img_data[(h*224+w)*3 + offset + 1];
-                padding_img[0][h*226+w+227] = img_data[(h*224+w)*3 + offset + 0];
-            end
-        end
-        $fclose(img_in);
-    end
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //---------------------------------------------------------------
-    //This initial block write the pixel 
-    //---------------------------------------------------------------
-    initial begin
-        clk = 1'b0;
-
-        // layer 1: 64 pixels
-        for (img_idx = 0; img_idx < 64; img_idx = img_idx + 4) begin
-            rst = 1'b1;
-            sel = 1'b0;
-            count = 227;
-            #(`period*2);
-            rst = 1'b0;
-            #(`period);
-
-            // generate path
-            $sformat(img_path_1, "%s%1d.bmp", `IMG_PATH_BASE_1, img_idx);
-            $sformat(img_path_2, "%s%1d.bmp", `IMG_PATH_BASE_1, img_idx+1);
-            $sformat(img_path_3, "%s%1d.bmp", `IMG_PATH_BASE_1, img_idx+2);
-            $sformat(img_path_4, "%s%1d.bmp", `IMG_PATH_BASE_1, img_idx+3);
-            $display("output to layer 1 file %d", img_idx);
-            
-            // open file
-            img_out_1 = $fopen(img_path_1, "wb");
-            img_out_2 = $fopen(img_path_2, "wb");
-            img_out_3 = $fopen(img_path_3, "wb");
-            img_out_4 = $fopen(img_path_4, "wb");
-
-            // write header of output bmp file 
-            for(header = 0; header < 54; header = header + 1) begin
-                $fwrite(img_out_1, "%c", img_data[header]);
-                $fwrite(img_out_2, "%c", img_data[header]);
-                $fwrite(img_out_3, "%c", img_data[header]);
-                $fwrite(img_out_4, "%c", img_data[header]);
-            end
-            
-            // weight & bias
-            for (jdx = 0; jdx < `weight_1_input_size; jdx = jdx+1) begin
-                input_weight_1[jdx*16 +: 16] = weight_1_data[img_idx*`weight_1_input_size+jdx]; // 2d to 1d
-                input_weight_2[jdx*16 +: 16] = weight_1_data[(img_idx+1)*`weight_1_input_size+jdx]; 
-                input_weight_3[jdx*16 +: 16] = weight_1_data[(img_idx+2)*`weight_1_input_size+jdx]; 
-                input_weight_4[jdx*16 +: 16] = weight_1_data[(img_idx+3)*`weight_1_input_size+jdx]; 
-            end
-            input_bias_1 = bias_1_data[img_idx];
-            input_bias_2 = bias_1_data[img_idx+1];
-            input_bias_3 = bias_1_data[img_idx+2];
-            input_bias_4 = bias_1_data[img_idx+3];
-
-            // exec    
-            for(idx = 0; idx < `padding_img_size+1; idx = idx+1) begin
-                pixel_1 = padding_img[2][idx];
-                pixel_2 = padding_img[1][idx];
-                pixel_3 = padding_img[0][idx];
-                pixel_4 = 8'b0;
-                #(`period);
-                // write data
-                if (en) begin
-                    $fwrite(img_out_1, "%c%c%c", out_1, out_1, out_1); padding_img_after_layer1[img_idx][count] = out_1;
-                    $fwrite(img_out_2, "%c%c%c", out_2, out_2, out_2); padding_img_after_layer1[img_idx+1][count] = out_2;
-                    $fwrite(img_out_3, "%c%c%c", out_3, out_3, out_3); padding_img_after_layer1[img_idx+2][count] = out_3;
-                    $fwrite(img_out_4, "%c%c%c", out_4, out_4, out_4); padding_img_after_layer1[img_idx+3][count] = out_4;
-                    count = count+1;
-                    while ((count>=0 && count<=225) || (count%226==0) || (count==225+(count/226)*226) || (count>=50849 && count<=51075)) count = count+1;
+    task run_pass;   // uses layer, last, og, ig
+        begin
+            rst = 1'b1; pixel_1 = 0; pixel_2 = 0; pixel_3 = 0; pixel_4 = 0; psum_in = 0;
+            #(`period * 2);
+            rst = 1'b0;                              // pixel 0 meets the first rising edge
+            n = 0;
+            for (idx = 0; idx <= `NP; idx = idx + 1) begin
+                if (idx < `NP) begin
+                    pixel_1 = in_px(ig, 0, idx); pixel_2 = in_px(ig, 1, idx);
+                    pixel_3 = in_px(ig, 2, idx); pixel_4 = in_px(ig, 3, idx);
+                end else begin
+                    pixel_1 = 0; pixel_2 = 0; pixel_3 = 0; pixel_4 = 0;
                 end
-            end
-
-            // close file
-            $fclose(img_out_1);
-            $fclose(img_out_2);
-            $fclose(img_out_3);
-            $fclose(img_out_4);
-        end
-        $fclose(bias_1);
-        $fclose(weight_1);
-
-        for (img_idx = 0; img_idx < 64; img_idx = img_idx + 4) begin
-            rst = 1'b1;
-            count = 0;
-            sel = 1'b1;
-            sel2 = 1'b0;
-            #(`period*2);
-            rst = 1'b0;
-            #(`period);
-
-            // generate path
-            $sformat(img_path_1, "%s%1d.bmp", `IMG_PATH_BASE_2, img_idx);
-            $sformat(img_path_2, "%s%1d.bmp", `IMG_PATH_BASE_2, img_idx+1);
-            $sformat(img_path_3, "%s%1d.bmp", `IMG_PATH_BASE_2, img_idx+2);
-            $sformat(img_path_4, "%s%1d.bmp", `IMG_PATH_BASE_2, img_idx+3);
-            $display("output to layer 2 file %d", img_idx);
-            
-            // open file
-            img_out_1 = $fopen(img_path_1, "wb");
-            img_out_2 = $fopen(img_path_2, "wb");
-            img_out_3 = $fopen(img_path_3, "wb");
-            img_out_4 = $fopen(img_path_4, "wb");
-
-            // write header of output bmp file 
-            for(header = 0; header < 54; header = header + 1) begin
-                $fwrite(img_out_1, "%c", img_data[header]);
-                $fwrite(img_out_2, "%c", img_data[header]);
-                $fwrite(img_out_3, "%c", img_data[header]);
-                $fwrite(img_out_4, "%c", img_data[header]);
-            end
-
-            // bias
-            input_bias_1 = bias_2_data[img_idx];
-            input_bias_2 = bias_2_data[img_idx+1];
-            input_bias_3 = bias_2_data[img_idx+2];
-            input_bias_4 = bias_2_data[img_idx+3];
-
-            // exec loop 16 times  
-            for (jdx = 0; jdx < 64; jdx = jdx+4) begin
-                // weight
-                for (idx = 0; idx < `weight_2_input_size; idx = idx+1) begin
-                    input_weight_1[idx*16 +: 16] = weight_2_data[jdx*9+idx+img_idx*576]; // 2d to 1d
-                    input_weight_2[idx*16 +: 16] = weight_2_data[jdx*9+idx+img_idx*576+1*576]; 
-                    input_weight_3[idx*16 +: 16] = weight_2_data[jdx*9+idx+img_idx*576+2*576]; 
-                    input_weight_4[idx*16 +: 16] = weight_2_data[jdx*9+idx+img_idx*576+3*576]; 
-                end
-
-                if(count == 15) sel2 = 1'b1;
-                $display("count: %d, sel2: %d", count, sel2);
-                for(idx = 0; idx < `padding_img_size+1; idx = idx+1) begin
-                    pixel_1 = padding_img_after_layer1[jdx][idx];
-                    pixel_2 = padding_img_after_layer1[jdx+1][idx];
-                    pixel_3 = padding_img_after_layer1[jdx+2][idx];
-                    pixel_4 = padding_img_after_layer1[jdx+4][idx];
-                    #(`period);
-                    // write data
-                    if (en & (count == 15)) begin
-                        //$display("out success");
-                        $fwrite(img_out_1, "%c%c%c", out_1, out_1, out_1);
-                        $fwrite(img_out_2, "%c%c%c", out_2, out_2, out_2);
-                        $fwrite(img_out_3, "%c%c%c", out_3, out_3, out_3);
-                        $fwrite(img_out_4, "%c%c%c", out_4, out_4, out_4);
+                // the rising edge is at +period/2; give the engine the stored
+                // partial sums of the window it now shows, read it at +period
+                #(`period - 1);
+                for (k = 0; k < 4; k = k + 1)
+                    psum_in[k * 36 +: 36] = (layer && ig > 0 && en) ? psum[k * `S * `S + n] : 36'sd0;
+                #1;
+                if (en) begin                            // output pixel n of this pass
+                    for (k = 0; k < 4; k = k + 1) psum[k * `S * `S + n] = psum_out[k * 36 +: 36];
+                    if (!layer) begin
+                        j = (n / `S + 1) * `WP + (n % `S + 1);
+                        l1[(og * 4 + 0) * `NP + j] = out_1; l1[(og * 4 + 1) * `NP + j] = out_2;
+                        l1[(og * 4 + 2) * `NP + j] = out_3; l1[(og * 4 + 3) * `NP + j] = out_4;
+                    end else if (last) begin
+                        l2[(og * 4 + 0) * `S * `S + n] = out_1; l2[(og * 4 + 1) * `S * `S + n] = out_2;
+                        l2[(og * 4 + 2) * `S * `S + n] = out_3; l2[(og * 4 + 3) * `S * `S + n] = out_4;
                     end
+                    n = n + 1;
                 end
-                if(count == 15) begin 
-                    count = 0;
-                    sel2 = 1'b0;
-                end
-                else count = count + 1;
             end
-
-            // close file
-            $fclose(img_out_1);
-            $fclose(img_out_2);
-            $fclose(img_out_3);
-            $fclose(img_out_4);
+            if (n != `S * `S) $display("ERROR: pass %0d/%0d produced %0d outputs, expected %0d", og, ig, n, `S * `S);
         end
-        $fclose(bias_2);
-        $fclose(weight_2);
+    endtask
+
+    task load_weights;   // 4 output channels og*4.. ; conv1_2: input group ig
+        integer oc;
+        begin
+            for (k = 0; k < 4; k = k + 1) begin
+                oc = og * 4 + k;
+                for (j = 0; j < 36; j = j + 1) begin
+                    if (!layer) ch = (j < 27) ? w1[oc * 27 + j] : 16'sd0;
+                    else        ch = w2[(oc * 64 + ig * 4) * 9 + j];
+                    case (k)
+                        0: wt1[j * 16 +: 16] = ch;  1: wt2[j * 16 +: 16] = ch;
+                        2: wt3[j * 16 +: 16] = ch;  default: wt4[j * 16 +: 16] = ch;
+                    endcase
+                end
+            end
+            bs1 = layer ? b2[og * 4] : b1[og * 4];         bs2 = layer ? b2[og * 4 + 1] : b1[og * 4 + 1];
+            bs3 = layer ? b2[og * 4 + 2] : b1[og * 4 + 2]; bs4 = layer ? b2[og * 4 + 3] : b1[og * 4 + 3];
+        end
+    endtask
+
+    task write_pgm;      // channel ch of l1 (layer 0) or l2 (layer 1)
+        begin
+            $sformat(fname, "%s/cat_%0d.pgm", layer ? "out_layer2" : "out_layer1", ch);
+            fd = $fopen(fname, "w");
+            $fwrite(fd, "P2\n%0d %0d\n255\n", `S, `S);
+            for (n = 0; n < `S * `S; n = n + 1)
+                $fwrite(fd, "%0d\n", layer ? l2[ch * `S * `S + n] : l1[ch * `NP + (n / `S + 1) * `WP + (n % `S + 1)]);
+            $fclose(fd);
+        end
+    endtask
+
+    initial begin
+        $readmemh("../../data/conv1_kernel_hex.txt", w1);
+        $readmemh("../../data/conv1_bias_hex.txt", b1);
+        $readmemh("../../data/conv2_kernel_hex.txt", w2);
+        $readmemh("../../data/conv2_bias_hex.txt", b2);
+        fd = $fopen("../../data/cat224.bmp", "rb");
+        k = $fread(bmp, fd);
+        $fclose(fd);
+        off = {bmp[13], bmp[12], bmp[11], bmp[10]};
+        for (j = 0; j < 3 * `NP; j = j + 1) in0[j] = 0;
+        for (j = 0; j < 64 * `NP; j = j + 1) l1[j] = 0;
+        for (n = 0; n < `S * `S; n = n + 1) begin
+            j = (n / `S + 1) * `WP + (n % `S + 1);
+            in0[0 * `NP + j] = bmp[((n / `S) * 224 + (n % `S)) * 3 + off + 2];   // R
+            in0[1 * `NP + j] = bmp[((n / `S) * 224 + (n % `S)) * 3 + off + 1];   // G
+            in0[2 * `NP + j] = bmp[((n / `S) * 224 + (n % `S)) * 3 + off + 0];   // B
+        end
+        layer = 0; last = 0; ig = 0;
+        for (og = 0; og < 16; og = og + 1) begin
+            $display("conv1_1 output channels %0d-%0d", og * 4, og * 4 + 3);
+            load_weights; run_pass;
+        end
+        for (ch = 0; ch < 64; ch = ch + 1) write_pgm;
+        layer = 1;
+        for (og = 0; og < 16; og = og + 1) begin
+            $display("conv1_2 output channels %0d-%0d", og * 4, og * 4 + 3);
+            for (ig = 0; ig < 16; ig = ig + 1) begin
+                last = (ig == 15);
+                load_weights; run_pass;
+            end
+        end
+        for (ch = 0; ch < 64; ch = ch + 1) write_pgm;
+        $display("ALL FEATURE MAPS WRITTEN");
         $finish;
     end
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    always begin
-		#(`period/2.0) clk <= ~clk;
-	end
-    /*
-    initial begin
-		$sdf_annotate (`path_sdf, <your instance name>);
-	end
-    */
 endmodule
