@@ -1,0 +1,26 @@
+# simulation outputs
+build/
+logs/
+*.vvp
+*.vcd
+*.fst
+*.fsdb
+coverage*.dat
+__pycache__/
+# images written by the course testbenches (inputs live in data/, references in golden/)
+03-sobel-edge-detection/tb/legacy/cat_after_sobel_*.bmp
+04-cnn-accelerator/tb/legacy/out_layer*/
+# EDA tool droppings
+csrc/
+simv*
+*.daidir/
+ucli.key
+novas*
+nWaveLog/
+verdiLog/
+command.log
+default.svf
+*.syn
+*.pvl
+*.mr
+cksum_dir/

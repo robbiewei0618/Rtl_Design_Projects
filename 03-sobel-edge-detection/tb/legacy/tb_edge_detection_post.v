@@ -5,9 +5,9 @@
 //---------------------------------------------------------------
 //You need specify the path of image in/out
 //---------------------------------------------------------------
-`define path_img_in     "./cat.bmp"
-`define path_img_out_x    "./cat_after_sobel_x.bmp"
-`define path_img_out_y    "./cat_after_sobel_y.bmp"
+`define path_img_in     "data/cat.bmp"
+`define path_img_out_x    "cat_after_sobel_x.bmp"
+`define path_img_out_y    "cat_after_sobel_y.bmp"
 
 module HDL_HW4_TB;
     integer img_in;
@@ -131,6 +131,6 @@ module HDL_HW4_TB;
 	end
 
     initial begin
-        $sdf_annotate ("/home/B103040012_HDL/HDL/HW4/Gatelevel/Area/Edge_detection/dc_out_file/Edge_Detection_syn.sdf", UUT);
+        $sdf_annotate ("Edge_Detection_syn.sdf", UUT);
 	end
 endmodule

@@ -5,9 +5,9 @@
 //---------------------------------------------------------------
 //You need specify the path of image in/out
 //---------------------------------------------------------------
-`define path_img_in     "./cat.bmp"
-`define path_img_out_x    "./cat_after_sobel_x.bmp"
-`define path_img_out_y    "./cat_after_sobel_y.bmp"
+`define path_img_in     "data/cat.bmp"
+`define path_img_out_x    "cat_after_sobel_x.bmp"
+`define path_img_out_y    "cat_after_sobel_y.bmp"
 
 module HDL_HW4_TB;
     integer img_in;

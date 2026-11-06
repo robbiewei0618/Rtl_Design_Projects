@@ -40,7 +40,7 @@ module tb_thumb();
   initial begin
       $dumpvars();
       $dumpfile("delay.vcd");
-      $sdf_annotate("/home/M133040086_HDL/hw3/gtl/dc_out_file/delay/thumb_syn.sdf", UUT);
+      $sdf_annotate("thumb_syn.sdf", UUT);
   end
 
   // instantiate the unit under test

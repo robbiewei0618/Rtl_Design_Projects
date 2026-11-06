@@ -32,12 +32,12 @@ set Clk_period		"0.73"
 
 #Read Design
 #如果設計有parameter設計，read_file指定不能用，需使用analyze + elaborate指令並自行更改路徑
-# read_file -format verilog {/home/m103040049/HDL_HW/multiplier.v}
+# read_file -format verilog {multiplier.v}
 # current_design $Top
-analyze -format verilog { 	/home/B103040012_HDL/HDL/HW4/RTL/Conv.v 
-                            /home/B103040012_HDL/HDL/HW4/RTL/Intensity.v
-                            /home/B103040012_HDL/HDL/HW4/RTL/LineBuffer.v
-                            /home/B103040012_HDL/HDL/HW4/RTL/edge_detection.v
+analyze -format verilog { 	../rtl/Conv.v 
+                            ../rtl/Intensity.v
+                            ../rtl/LineBuffer.v
+                            ../rtl/edge_detection.v
                         }
 elaborate $Top
 

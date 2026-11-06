@@ -22,7 +22,7 @@ module testbench;
     initial begin
         $dumpvars();
         $dumpfile("pipeline_wave.vcd");
-        $sdf_annotate("/home/B103040012_HDL/HDL/HW2/GateLevel/pipeline/dc_out_file/hw2_pipeline_syn.sdf", pipe_uut);
+        $sdf_annotate("hw2_pipeline_syn.sdf", pipe_uut);
     end
 
     // Test

@@ -33,14 +33,14 @@ set t_out 0.02
 
 #Read Design
 #如果設計有parameter設計，read_file指定不能用，需使用analyze + elaborate指令並自行更改路徑
-# read_file -format verilog {/home/m103040049/HDL_HW/multiplier.v}
+# read_file -format verilog {multiplier.v}
 # current_design $Top
 analyze -format verilog {
-    /home/M133040065_HDL/hw03/rtl/thumb_pipe.v \
-    /home/M133040065_HDL/hw03/rtl/if_stage.v \
-    /home/M133040065_HDL/hw03/rtl/id_stage.v \
-    /home/M133040065_HDL/hw03/rtl/ex_stage.v \
-    /home/M133040065_HDL/hw03/rtl/wb_stage.v \
+    ../rtl/thumb_pipe.v \
+    ../rtl/if_stage.v \
+    ../rtl/id_stage.v \
+    ../rtl/ex_stage.v \
+    ../rtl/wb_stage.v \
 }
 elaborate $Top
 

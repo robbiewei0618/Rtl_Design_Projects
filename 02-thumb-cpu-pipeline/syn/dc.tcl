@@ -20,8 +20,8 @@ alias h history
 #Path_Top:Verilog放置的位置
 #Path_Syn:合成後report.txt檔案要放置的根位置，需自行在目錄下創建名為dc_out_file之資料夾
 #Dump_file_name:合成後產生檔案之名字
-set Path_Top		"/home/M133040086_HDL/HW3/rtl/"
-set Path_Syn		"/home/M133040086_HDL/HW3/syn/"
+set Path_Top		"../rtl/"
+set Path_Syn		"./HW3/syn/"
 set Dump_file_name  "IF_syn"
 #設定Top module 名稱，需跟自行設計之電路的top module name相同
 set Top				"thumb_pipe"
@@ -33,11 +33,11 @@ set t_out 0.02
 
 #Read Design
 #如果設計有parameter設計，read_file指定不能用，需使用analyze + elaborate指令並自行更改路徑
-# read_file -format verilog {/home/m103040049/HDL_HW/multiplier.v}
+# read_file -format verilog {multiplier.v}
 # current_design $Top
 analyze -format verilog {
-/home/M133040086_HDL/HW3/rtl/thumb_pipe.v
-/home/M133040086_HDL/HW3/rtl/IF.v
+../rtl/thumb_pipe.v
+../rtl/IF.v
 }
 elaborate $Top
 

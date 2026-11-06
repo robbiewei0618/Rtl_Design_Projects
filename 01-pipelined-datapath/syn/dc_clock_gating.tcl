@@ -32,9 +32,9 @@ set Clk_period		"0.29"
 
 #Read Design
 #如果設計有parameter設計，read_file指定不能用，需使用analyze + elaborate指令並自行更改路徑
-# read_file -format verilog {/home/m103040049/HDL_HW/multiplier.v}
+# read_file -format verilog {multiplier.v}
 # current_design $Top
-analyze -format verilog { 	/home/B103040012_HDL/HDL/HW2/RTL/Clock_gating/clock_gating.v }
+analyze -format verilog { 	../rtl/clock_gating.v }
 elaborate $Top
 
 #檢查是否讀取成功

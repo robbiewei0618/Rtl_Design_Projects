@@ -9,10 +9,10 @@
 //---------------------------------------------------------------
 //You need specify the path of image in/out
 //---------------------------------------------------------------
-`define path_img_in      "/home/B105040024_HDL/HW5/cat224.bmp"
-`define conv1_weight     "/home/B105040024_HDL/HW5/conv1_kernel_hex.txt"
-`define conv1_bias       "/home/B105040024_HDL/HW5/conv1_bias_hex.txt"
-`define IMG_PATH_BASE    "/home/B105040024_HDL/HW5/out_layer1/cat_"
+`define path_img_in      "../../data/cat224.bmp"
+`define conv1_weight     "../../data/conv1_kernel_hex.txt"
+`define conv1_bias       "../../data/conv1_bias_hex.txt"
+`define IMG_PATH_BASE    "out_layer1/cat_"
 
 module HDL_HW5_TB;
     integer img_in, img_out_1, img_out_2, img_out_3, img_out_4;
@@ -174,7 +174,7 @@ module HDL_HW5_TB;
 	end
     
     initial begin
-		$sdf_annotate ("/home/B105040024_HDL/HW5_dc_out/cat.sdf", L1);
+		$sdf_annotate ("cat.sdf", L1);
 	end
     
 endmodule
