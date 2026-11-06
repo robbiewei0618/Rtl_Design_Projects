@@ -5,7 +5,10 @@ module LineBuffer(clk, rst, Y, en, R0, R1, R2, R3, R4, R5, R6, R7, R8);
     output reg en;
     output reg signed [19:0] R0, R1, R2, R3, R4, R5, R6, R7, R8;
 
-    integer i, counter;
+    integer i;
+    // position (padded image, 482 wide) of the pixel now in Regs[`REG_LEN]
+    reg [8:0] col, row;
+    reg       have_pixel;
     reg signed [19:0] Regs[0:`REG_LEN];
 
     always @ (posedge clk or negedge rst) begin
@@ -19,7 +22,10 @@ module LineBuffer(clk, rst, Y, en, R0, R1, R2, R3, R4, R5, R6, R7, R8);
             R6 <= 0;
             R7 <= 0;
             R8 <= 0;
-            counter <= 0;
+            col <= 0;
+            row <= 0;
+            have_pixel <= 0;
+            en <= 0;
         end
         else begin
             for (i = 0; i < `REG_LEN; i=i+1) begin
@@ -39,11 +45,23 @@ module LineBuffer(clk, rst, Y, en, R0, R1, R2, R3, R4, R5, R6, R7, R8);
             R7 <= Regs[965];
             R8 <= Regs[966];
 
-            if (counter == 481 || counter == 0)
-                en <= 0;
-            else
-                en <= 1;
-            counter <= (counter == 481 ? 0 : counter + 1);
+            // R0..R8 now receive the window that ends at the pixel in
+            // Regs[`REG_LEN]; it is a real 3x3 window iff that pixel is at
+            // column >= 2 and row >= 2 (otherwise it wraps around a row end
+            // or still contains the rows before the image).
+            en <= have_pixel && (col >= 9'd2) && (row >= 9'd2);
+
+            // position of the pixel captured at this edge
+            have_pixel <= 1'b1;
+            if (!have_pixel) begin
+                col <= 9'd0;
+                row <= 9'd0;
+            end else if (col == 9'd481) begin
+                col <= 9'd0;
+                row <= row + 9'd1;
+            end else begin
+                col <= col + 9'd1;
+            end
         end
     end
 endmodule

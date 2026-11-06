@@ -53,18 +53,22 @@ module HDL_HW4_TB;
         #(`period/2.0)
         rst = 1'b0;
         // clk = 0
-        #(`period/2.0)
+        #(`period)
+        // clk = 0 again: release reset and present pixel 0 on a falling edge,
+        // so neither races a rising edge (the first version changed both on
+        // a rising edge, and VCS and Icarus resolved the race differently).
+        // Pixel 0 is captured by the first rising edge after reset.
         rst = 1'b1;
-        // clk = 1
-        //loading after padding file to your module
-        for(idx = 0; idx < `padding_img_size; idx = idx+1) begin
-            R <= padding_img[2][idx];
-            G <= padding_img[1][idx];
-            B <= padding_img[0][idx];
+        //loading after padding file to your module (one extra cycle at the
+        //end: the last window comes out one clock after the last pixel)
+        for(idx = 0; idx < `padding_img_size + 1; idx = idx+1) begin
+            R <= (idx < `padding_img_size) ? padding_img[2][idx] : 8'd0;
+            G <= (idx < `padding_img_size) ? padding_img[1][idx] : 8'd0;
+            B <= (idx < `padding_img_size) ? padding_img[0][idx] : 8'd0;
             #(`period);
             //---------------------------------------------------------------
             //Write output data to output file here
-            if (en && idx > 482+482-1) begin
+            if (en) begin   // en now marks exactly the 480x360 valid windows
                 $fwrite(img_out_x, "%c", out_x);
                 $fwrite(img_out_x, "%c", out_x);
                 $fwrite(img_out_x, "%c", out_x);

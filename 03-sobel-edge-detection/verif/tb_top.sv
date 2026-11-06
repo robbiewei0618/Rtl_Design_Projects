@@ -11,7 +11,7 @@
 // Reference: a bit-exact SV model (same luminance approximation, same
 // kernels and threshold compare) fed with the same stream.
 // Images: the course photo (data/cat.bmp), RGB noise, sharp vertical and
-// horizontal steps, and a ramp whose gradient sits right at the threshold;
+// horizontal steps, and ramps whose gradients sweep across every threshold;
 // each is run with thresholds 130 (course value), 0 and 400.
 // Inputs are driven on the falling edge so nothing races the rising edge.
 // SVA: outputs are 0 or 255, no X when en is high.
@@ -56,8 +56,8 @@ module tb_top;
           1: p = 24'($urandom);
           2: p = ((w / 7) % 2) ? 24'hFFFFFF : 24'h000000;                       // vertical steps
           3: p = ((h / 5) % 2) ? 24'hC0C0C0 : 24'h202020;                       // horizontal steps
-          default: begin                                                       // ramp: Gx = 4*slope
-            logic [7:0] v = 8'((w * 33) / 4);                                  // slope ~8.25 grey/pixel
+          default: begin                                                       // ramps, slope 1..72 per row
+            logic [7:0] v = 8'((w * (1 + h % 72)) % 256);                      // Gx ~ 8*slope*0.89 sweeps 0..500
             p = {v, v, v};
           end
         endcase
@@ -89,7 +89,10 @@ module tb_top;
     cp_pos: coverpoint cv_pos { bins corner = {0}; bins border = {1}; bins interior = {2}; }
     cp_img: coverpoint cv_img { bins img[] = {[0:4]}; }
     cp_th: coverpoint cv_th { bins th[] = {0, 130, 400}; }
-    x_gx_pos: cross cp_gx, cp_pos;
+    x_gx_th: cross cp_gx, cp_th {
+      // with threshold 0 every gradient is negative, at, or above it
+      ignore_bins none_below_0 = binsof(cp_gx.below) && binsof(cp_th) intersect {0};
+    }
   endgroup
   cg_sobel cov = new();
   function automatic int rel(int g, int th);
@@ -110,8 +113,10 @@ module tb_top;
     threshold = th;
     rst = 0; {R, G, B} = '0;
     repeat (2) @(negedge clk);
+    // protocol: pixel 0 is captured by the first rising edge after reset
     rst = 1;
-    for (int k = 0; k < N + 2; k++) begin
+    {R, G, B} = img[0];
+    for (int k = 1; k < N + 2; k++) begin
       @(negedge clk);
       q = k - 2;      // window whose last pixel was captured two edges ago
       if (q >= 0) begin
