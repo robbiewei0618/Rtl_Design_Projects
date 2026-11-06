@@ -273,7 +273,7 @@ always @(negedge reset_n or posedge clk) begin
         ID_Rn <= 32'h0000_0000;
         ID_Rm_Rs <= 32'h0000_0000;
         ID_imm_offset <= 11'b000_0000_0000;
-        ID_opcode <= 6'b00_0000;
+        ID_opcode <= `UNDEF;      // a bubble: 6'b00_0000 would be ADC
         ID_cond <= 4'b0000;
         ID_Rd_code <= 3'b000;
     end
@@ -771,7 +771,7 @@ always @(negedge reset_n or posedge clk) begin
       DR <= 32'h0000_0000;
       EX_ALU_out <= 32'h0000_0000;
       EX_imm_offset <= 11'b00_0000_0000;
-      EX_opcode <= 6'b00_0000;
+      EX_opcode <= `UNDEF;        // a bubble: 6'b00_0000 would be ADC
       EX_Rd_code <= 3'b000;
     end
     else begin  // on positive clock edge
